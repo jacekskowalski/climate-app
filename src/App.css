@@ -1,0 +1,44 @@
+
+.imageContainer{
+    background-image:url("./img/map.jpg");
+    height:550px;
+    min-width:100%;
+}
+
+.searchForm{
+    padding-top:100px;
+}
+
+.resultContainer{
+    position:absolute;
+    top:600px;
+    left:0;
+    width:90vw;
+   
+}
+.btn{
+    width:150px;
+    margin-top:20px;
+    border-radius:15px;
+}
+.btn1 {
+    margin-left: 10%;
+}
+.btn:nth-of-type(1){
+    margin-right:20px;
+}
+.resultList{
+    margin-top:30px;
+}
+
+@media screen and (min-width: 500px){
+    .btn1{
+       margin-left:20%;
+    }
+}
+@media screen and (min-width: 990px) {
+    .btn1 {
+        margin-left: 0;
+    }
+  
+}
