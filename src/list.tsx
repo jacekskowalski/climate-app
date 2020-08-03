@@ -2,13 +2,13 @@
 import React, { FunctionComponent } from 'react';
 import { Card, Button, Accordion } from 'react-bootstrap';
 
-interface IDescription {
-
-    name: any,
-    value: any
+export interface IDescription {
+    name: string | string[],
+    value: number | number[],
+    unit: string | string[]
 }
 
-export const CountryComponent: FunctionComponent<IDescription> = ({name, value}) => {
+export const CountryComponent: FunctionComponent<IDescription> = ({name,value, unit}) => {
     return (
         <>
             <Accordion>
@@ -19,7 +19,7 @@ export const CountryComponent: FunctionComponent<IDescription> = ({name, value})
                          </Accordion.Toggle>
                     </Card.Header>
                     <Accordion.Collapse eventKey="0">
-                        <Card.Body>{value}</Card.Body>
+                        <Card.Body>{value} {unit}</Card.Body>
                     </Accordion.Collapse>
                 </Card>
                 </Accordion>

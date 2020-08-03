@@ -1,7 +1,7 @@
 ﻿import './App.css';
 import React, { Component } from 'react';
 import { Container, Row, Col,Form, Button} from 'react-bootstrap';
-import { CountryComponent } from './list';
+import { CountryComponent, IDescription } from './list';
 import { Typeahead} from 'react-bootstrap-typeahead';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 import { countryList } from './country_list';
@@ -16,8 +16,8 @@ export default class Main extends Component<{}, any> {
             selectedDays: "",
             countrycode : "",
             cities: [],
-            accordionDescription:[],
-            setOfDistinctCities : new Set()
+            CityPolutionList: []
+
         };
         this.handleCountryChange = this.handleCountryChange.bind(this);
         this.handleNumberChange = this.handleNumberChange.bind(this);   
@@ -50,8 +50,7 @@ export default class Main extends Component<{}, any> {
     }
 
     handleCountryChange(name: any): void{
-        console.log("name " + name);
-        let code:string = this.setCountryCode(String(name).toUpperCase());
+         let code:string = this.setCountryCode(String(name).toUpperCase());
         this.setState({
             selectedCountry: name.target,
             countrycode: code 
@@ -68,9 +67,8 @@ export default class Main extends Component<{}, any> {
             selectedCountry: "",
             selectedDays: "",
             countrycode: "",
-            cities: [],
-            accordionDescription: [],
-            setOfDistinctCities: new Set()
+            cities: []
+
         });
     }
 
@@ -78,51 +76,29 @@ export default class Main extends Component<{}, any> {
     const nrOfLastDaysToMillis = parseInt(param,10) * 24 * 60 * 60 * 1000;
     const finalDate = new Date(Date.now() - nrOfLastDaysToMillis);
     const checkDay = finalDate.getDate().toString().length === 2 ? finalDate.getDate() : '0' + finalDate.getDate();
-    return finalDate.getFullYear() + '-' + (finalDate.getMonth() + 1) + '-' + checkDay;
+    const getMonth= '0'+(finalDate.getMonth()+1);
+
+    return `${finalDate.getFullYear()}-${getMonth}-${checkDay}`;
 }
     async getMostPolutedCities() {
-      fetch('https://api.openaq.org/v1/measurements?country=' + encodeURIComponent(this.state.countrycode) + '&date_from=' + encodeURIComponent(this.createCustomDate(this.state.selectedDays)) + '&order_by[]=value&sort=desc')
+      fetch('https://api.openaq.org/v1/measurements?country=' + encodeURIComponent(this.state.countrycode) + '&date_from=' + encodeURIComponent(this.createCustomDate(this.state.selectedDays)) + '&order_by[]=value&sort=desc&limit=10')
           .then(data => data.json())
-          .then(data => {
-              let tempSet = new Set();
-              let resultObj = data.results;
+          .then(async data => {
+
+        let tempArray:any[]=[];
+              let resultObj= data.results;
+
               Array.from(resultObj)
-                  .forEach((item: any) => {
-                      return tempSet.add(item.city)
+                  .map((item:any) => {
+let splitEntry= (String.raw `${item.city} ${item.value} ${item.unit}`).split(" ");
+                       tempArray.push(splitEntry );
                     }
-                  )
-              const dat = Array.from(tempSet)
-                  .slice(0, 10)
-              return dat;
-          }).then(async data => {
-                  let tempArray: any = [];
-                  data.forEach(item => {
-                      tempArray.push(item);
-                  }
-                  )
-                  await this.setState({ cities: tempArray }, ()=> this.createList());
-              }
-      )
+                  );
+
+          await   this.setState({ CityPolutionList: tempArray });
+
+          });
 }
-
-   createList() {  
-      this.state.cities.forEach( (item: string) => {
-          let val: any = item;
-         fetch('https://en.wikipedia.org/w/api.php?action=opensearch&search=' + encodeURIComponent(item) + '&format=json&limit=1&origin=*')
-              .then(data => data.json())
-              .then((data) => {
-                  let tempObj: any = {};              
-                  tempObj[val] = data[2].join("") === "" ? " Description not available" : data[2];
-                  this.setState((prev:any) =>({ accordionDescription:[
-                      ...prev.accordionDescription,tempObj]
-                  }));
-
-              })      
-      });
-    }
-    returnAllValues() {
-       
-    }
 
     render() {
     return(
@@ -152,8 +128,10 @@ export default class Main extends Component<{}, any> {
 
             <div className="resultContainer">
                 <ul className="resultList">
-                    { this.state.accordionDescription.map((item:any) => 
-                        (<CountryComponent key={Object.keys(item)+"id"} name={Object.keys(item)} value={Object.values(item)} />)
+                    { this.state.CityPolutionList.map((item:any) =>
+
+                        (<CountryComponent key={Object.keys(item[0])+ ""+Math.random() * (100 - 1) + 1}  name={Object.values(String(item[0]))} value={Object.values(item[1])}  unit={Object.values(String(item[2]))} />)
+
                     )}
                 </ul>
             </div>

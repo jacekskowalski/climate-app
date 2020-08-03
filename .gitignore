@@ -4,7 +4,7 @@
 /node_modules
 /.pnp
 .pnp.js
-
+climate-app.iml
 # testing
 /coverage
 
